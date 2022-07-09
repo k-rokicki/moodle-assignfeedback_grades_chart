@@ -17,6 +17,8 @@ into `mod/assign/feedback` directory.
 
 - Version 2022070900
     - Compatibility with Moodle 3.11
+- Version 2022071000
+    - Add missing /classes/privacy/provider.php
 
 ## About
 
