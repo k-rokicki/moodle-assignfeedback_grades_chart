@@ -18,9 +18,11 @@ into `mod/assign/feedback` directory.
 - Version 2022070900
   - Compatibility with Moodle 3.11
 - Version 2022071000
-  - Add missing /classes/privacy/provider.php
+  - Add missing `/classes/privacy/provider.php`
 - Version 2022071200
-  - Use bcmath library for all float calculations
+  - Use `bcmath` library for all float calculations
+- Version 2022071201
+  - Fix coding style problems
 
 ## About
 
