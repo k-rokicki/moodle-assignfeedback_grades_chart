@@ -31,6 +31,10 @@ const GRADE_PRECISION = 2;
 const NUM_RANGES = 10;
 
 /**
+ * To avoid float rounding errors, all the math below is using bcmath library functions.
+ */
+
+/**
  * Library class for grades_chart feedback plugin extending feedback plugin base class.
  *
  * @package   assignfeedback_grades_chart
@@ -70,8 +74,8 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
         global $DB, $OUTPUT;
 
         try {
-            $dbparams = array('id' => $grade->assignment);
-            $assign = $DB->get_record('assign', $dbparams);
+            $dbParams = array('id' => $grade->assignment);
+            $assign = $DB->get_record('assign', $dbParams);
 
             $due = $assign->duedate;
             $now = time();
@@ -86,11 +90,11 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
                 return '';
             }
 
-            $maxgrade = intval($assign->grade);
-            $ranges = $this->generateGradeRanges($maxgrade);
+            $maxGrade = $assign->grade;
+            $ranges = $this->generateGradeRanges($maxGrade);
 
-            $dbparams = array('assignment' => $grade->assignment);
-            $assignGrades = $DB->get_records('assign_grades', $dbparams);
+            $dbParams = array('assignment' => $grade->assignment);
+            $assignGrades = $DB->get_records('assign_grades', $dbParams);
             $lastAttemptGrades = $this->filterLastAttemptGrades($assignGrades);
 
             $numGradesInRange = $this->calculateNumGradesInRange($ranges, $lastAttemptGrades);
@@ -111,50 +115,45 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
     private function filterLastAttemptGrades(array $assignGrades): array {
         $latestGrades = [];
         foreach ($assignGrades as $singleGrade) {
-            $userid = $singleGrade->userid;
+            $userId = $singleGrade->userid;
             $grade = $singleGrade->grade;
             $attempt = $singleGrade->attemptnumber;
-            if (array_key_exists($userid, $latestGrades)) {
-                $entry = $latestGrades[$userid];
+            if (array_key_exists($userId, $latestGrades)) {
+                $entry = $latestGrades[$userId];
                 $latestAttempt = $entry['attempt'];
                 if ($attempt > $latestAttempt) {
-                    $this->updateUserGrade($latestGrades, $userid, $attempt, $grade);
+                    $this->updateUserGrade($latestGrades, $userId, $attempt, $grade);
                 }
             } else {
-                $this->updateUserGrade($latestGrades, $userid, $attempt, $grade);
+                $this->updateUserGrade($latestGrades, $userId, $attempt, $grade);
             }
         }
         return array_column(array_values($latestGrades), 'grade');
     }
 
     /**
-     * Format float value
-     *
-     * @param float $float   number to format
-     * @return string        formatted number
-     */
-    private function floatToString(float $float): string {
-        return number_format($float, GRADE_PRECISION,'.','');
-    }
-
-    /**
      * Calculate number of grades in the given ranges
      *
-     * @param int $maxgrade  max possible grade
-     * @param int $numranges number of ranges to return (excluding last range [maxgrade, maxgrade])
-     * @return array         grade ranges
+     * @param string $maxGrade max possible grade
+     * @param int $ranges      number of ranges to return (excluding last range [$maxGrade, $maxGrade])
+     * @return array           grade ranges
      */
-    private function generateGradeRanges(int $maxgrade, int $numranges = NUM_RANGES): array {
-        $rangeEnds = range($maxgrade / $numranges, $maxgrade, $maxgrade / $numranges);
-        $ranges = array([0, $rangeEnds[0]]);
+    private function generateGradeRanges(string $maxGrade, int $ranges = NUM_RANGES): array {
+        $numRanges = strval($ranges);
+        $step = bcdiv($maxGrade, $numRanges, GRADE_PRECISION);
+        $ranges = array();
 
-        for ($i = 1; $i < count($rangeEnds); $i++) {
-            $rangeEnd = $rangeEnds[$i];
-            $rangeStart = $ranges[count($ranges) - 1][1];
+        $rangeStart = '0';
+
+        do {
+            $rangeEnd = bcadd($rangeStart, $step, GRADE_PRECISION);
             $ranges[] = [$rangeStart, $rangeEnd];
-        }
+            $rangeStart = $rangeEnd;
+            $comparison = bccomp($rangeStart, $maxGrade, GRADE_PRECISION);
+        } while ($comparison < 0);
 
-        $ranges[] = [$maxgrade, $maxgrade];
+        $ranges[] = [$rangeStart, $rangeStart];
+
         return $ranges;
     }
 
@@ -167,9 +166,6 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
      */
     private function calculateNumGradesInRange(array $ranges, array $grades): array {
         $numGradesInRange = array_fill(0, count($ranges), 0);
-        $ranges = array_map(function ($range) {
-            return [$this->floatToString($range[0]), $this->floatToString($range[1])];
-        }, $ranges);
 
         foreach ($grades as $grade) {
             for ($i = count($ranges) - 1; $i >= 0; $i--) {
