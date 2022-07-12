@@ -23,6 +23,8 @@ into `mod/assign/feedback` directory.
   - Use `bcmath` library for all float calculations
 - Version 2022071201
   - Fix coding style problems
+- Version 2022071202
+  - Fix coding style problems (again)
 
 ## About
 

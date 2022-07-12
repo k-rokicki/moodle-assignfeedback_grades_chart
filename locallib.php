@@ -33,7 +33,7 @@ defined('MOODLE_INTERNAL') || die();
 const GRADE_PRECISION = 2;
 
 /**
- * Default number of ranges to show on the chart excluding last range [$max_grade, $max_grade].
+ * Default number of ranges to show on the chart excluding last range [maxgrade, maxgrade].
  */
 const DEFAULT_NUM_RANGES = 10;
 
@@ -81,8 +81,8 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
         global $DB, $OUTPUT;
 
         try {
-            $db_params = array('id' => $grade->assignment);
-            $assign = $DB->get_record('assign', $db_params);
+            $dbparams = array('id' => $grade->assignment);
+            $assign = $DB->get_record('assign', $dbparams);
 
             $due = $assign->duedate;
             $now = time();
@@ -97,16 +97,16 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
                 return '';
             }
 
-            $max_grade = $assign->grade;
-            $ranges = $this->generate_grade_ranges($max_grade);
+            $maxgrade = $assign->grade;
+            $ranges = $this->generate_grade_ranges($maxgrade);
 
-            $db_params = array('assignment' => $grade->assignment);
-            $assign_grades = $DB->get_records('assign_grades', $db_params);
-            $last_attempt_grades = $this->filter_last_attempt_grades($assign_grades);
+            $dbparams = array('assignment' => $grade->assignment);
+            $assigngrades = $DB->get_records('assign_grades', $dbparams);
+            $lastattemptgrades = $this->filter_last_attempt_grades($assigngrades);
 
-            $num_grades_in_range = $this->calculate_num_grades_in_range($ranges, $last_attempt_grades);
+            $numgradesinrange = $this->calculate_num_grades_in_range($ranges, $lastattemptgrades);
 
-            $chart = $this->generate_chart($ranges, $num_grades_in_range);
+            $chart = $this->generate_chart($ranges, $numgradesinrange);
             return $OUTPUT->render($chart);
         } catch (dml_exception | coding_exception $e) {
             return '';
@@ -116,50 +116,50 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
     /**
      * Filter only last attempt grades
      *
-     * @param array $assign_grades all grades for given assignment
-     * @return array               last attempt grades
+     * @param array $assigngrades all grades for given assignment
+     * @return array              last attempt grades
      */
-    private function filter_last_attempt_grades(array $assign_grades): array {
-        $latest_grades = [];
-        foreach ($assign_grades as $single_grade) {
-            $user_id = $single_grade->userid;
-            $grade = $single_grade->grade;
-            $attempt = $single_grade->attemptnumber;
-            if (array_key_exists($user_id, $latest_grades)) {
-                $entry = $latest_grades[$user_id];
-                $latest_attempt = $entry['attempt'];
-                if ($attempt > $latest_attempt) {
-                    $this->update_user_grade($latest_grades, $user_id, $attempt, $grade);
+    private function filter_last_attempt_grades(array $assigngrades): array {
+        $latestgrades = [];
+        foreach ($assigngrades as $singlegrade) {
+            $userid = $singlegrade->userid;
+            $grade = $singlegrade->grade;
+            $attempt = $singlegrade->attemptnumber;
+            if (array_key_exists($userid, $latestgrades)) {
+                $entry = $latestgrades[$userid];
+                $latestattempt = $entry['attempt'];
+                if ($attempt > $latestattempt) {
+                    $this->update_user_grade($latestgrades, $userid, $attempt, $grade);
                 }
             } else {
-                $this->update_user_grade($latest_grades, $user_id, $attempt, $grade);
+                $this->update_user_grade($latestgrades, $userid, $attempt, $grade);
             }
         }
-        return array_column(array_values($latest_grades), 'grade');
+        return array_column(array_values($latestgrades), 'grade');
     }
 
     /**
      * Calculate number of grades in the given ranges
      *
-     * @param string $max_grade max possible grade
-     * @param int $ranges       number of ranges to return (excluding last range [$max_grade, $max_grade])
-     * @return array            grade ranges
+     * @param string $maxgrade max possible grade
+     * @param int $ranges      number of ranges to return (excluding last range [$maxgrade, $maxgrade])
+     * @return array           grade ranges
      */
-    private function generate_grade_ranges(string $max_grade, int $ranges = DEFAULT_NUM_RANGES): array {
-        $num_ranges = strval($ranges);
-        $step = bcdiv($max_grade, $num_ranges, GRADE_PRECISION);
+    private function generate_grade_ranges(string $maxgrade, int $ranges = DEFAULT_NUM_RANGES): array {
+        $numranges = strval($ranges);
+        $step = bcdiv($maxgrade, $numranges, GRADE_PRECISION);
         $ranges = array();
 
-        $range_start = '0';
+        $rangestart = '0';
 
         do {
-            $range_end = bcadd($range_start, $step, GRADE_PRECISION);
-            $ranges[] = [$range_start, $range_end];
-            $range_start = $range_end;
-            $comparison = bccomp($range_start, $max_grade, GRADE_PRECISION);
+            $rangeend = bcadd($rangestart, $step, GRADE_PRECISION);
+            $ranges[] = [$rangestart, $rangeend];
+            $rangestart = $rangeend;
+            $comparison = bccomp($rangestart, $maxgrade, GRADE_PRECISION);
         } while ($comparison < 0);
 
-        $ranges[] = [$range_start, $range_start];
+        $ranges[] = [$rangestart, $rangestart];
 
         return $ranges;
     }
@@ -172,53 +172,53 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
      * @return array        number of grades in the consecutive ranges
      */
     private function calculate_num_grades_in_range(array $ranges, array $grades): array {
-        $num_grades_in_range = array_fill(0, count($ranges), 0);
+        $numgradesinrange = array_fill(0, count($ranges), 0);
 
         foreach ($grades as $grade) {
             for ($i = count($ranges) - 1; $i >= 0; $i--) {
                 $range = $ranges[$i];
-                $range_start = $range[0];
-                if (bccomp($grade, $range_start, GRADE_PRECISION) >= 0) {
-                    $num_grades_in_range[$i]++;
+                $rangestart = $range[0];
+                if (bccomp($grade, $rangestart, GRADE_PRECISION) >= 0) {
+                    $numgradesinrange[$i]++;
                     break;
                 }
             }
         }
 
-        return array_values($num_grades_in_range);
+        return array_values($numgradesinrange);
     }
 
     /**
      * Save grade from user's latest attempt
      *
-     * @param array $latest_grades array to update
-     * @param int $user_id         user ID
-     * @param int $attempt         attempt number
-     * @param string $grade        grade
+     * @param array $latestgrades array to update
+     * @param int $userid         user ID
+     * @param int $attempt        attempt number
+     * @param string $grade       grade
      * @return void
      */
-    private function update_user_grade(array & $latest_grades, int $user_id, int $attempt, string $grade) {
-        $new_entry = new stdClass();
-        $new_entry->attempt = $attempt;
-        $new_entry->grade = $grade;
-        $latest_grades[$user_id] = $new_entry;
+    private function update_user_grade(array & $latestgrades, int $userid, int $attempt, string $grade) {
+        $newentry = new stdClass();
+        $newentry->attempt = $attempt;
+        $newentry->grade = $grade;
+        $latestgrades[$userid] = $newentry;
     }
 
     /**
      * Construct the chart for given grades and ranges.
      *
-     * @param array $ranges              grade ranges
-     * @param array $num_grades_in_range number of grades in a given range
-     * @return chart_bar                 bar chart object
+     * @param array $ranges           grade ranges
+     * @param array $numgradesinrange number of grades in a given range
+     * @return chart_bar              bar chart object
      * @throws coding_exception
      */
-    private function generate_chart(array $ranges, array $num_grades_in_range): chart_bar {
+    private function generate_chart(array $ranges, array $numgradesinrange): chart_bar {
         global $CFG;
         $chart = new chart_bar();
 
         $series = new chart_series(
             get_string('series_name', 'assignfeedback_grades_chart'),
-            $num_grades_in_range
+            $numgradesinrange
         );
 
         $chart->add_series($series);
