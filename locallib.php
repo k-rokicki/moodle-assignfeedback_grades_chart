@@ -78,7 +78,11 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
      * @return string
      */
     public function view(stdClass $grade): string {
-        global $DB, $OUTPUT;
+        global $DB, $PAGE;
+
+        if ($PAGE->url->get_param('action') == 'grading') {
+            return '';
+        }
 
         try {
             $dbparams = array('id' => $grade->assignment);
@@ -97,20 +101,81 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
                 return '';
             }
 
-            $maxgrade = $assign->grade;
-            $ranges = $this->generate_grade_ranges($maxgrade);
-
-            $dbparams = array('assignment' => $grade->assignment);
-            $assigngrades = $DB->get_records('assign_grades', $dbparams);
-            $lastattemptgrades = $this->filter_last_attempt_grades($assigngrades);
-
-            $numgradesinrange = $this->calculate_num_grades_in_range($ranges, $lastattemptgrades);
-
-            $chart = $this->generate_chart($ranges, $numgradesinrange);
-            return $OUTPUT->render($chart);
+            return $this->get_rendered_chart($assign, $grade);
         } catch (dml_exception | coding_exception $e) {
             return '';
         }
+    }
+
+    /**
+     * Get form elements for grading form.
+     *
+     * @param stdClass $grade
+     * @param MoodleQuickForm $mform
+     * @param stdClass $data
+     * @param int $userid The userid we are currently grading
+     * @return bool true if elements were added to the form
+     */
+    public function get_form_elements_for_user($grade, MoodleQuickForm $mform, stdClass $data, $userid): bool {
+        global $DB;
+
+        try {
+            $dbparams = array('id' => $grade->assignment);
+            $assign = $DB->get_record('assign', $dbparams);
+            $chart = $this->get_rendered_chart($assign, $grade);
+
+            if ($chart == '') {
+                return false;
+            }
+
+            $html = '<div class="form-group row fitem has-popout">
+                        <div class="col-md-3 col-form-label d-flex pb-0 pr-md-0">
+                            <p class="mb-0 d-inline">
+                                ' . $this->get_name() . '
+                            </p>
+                        </div>
+                        <div class="col-md-9 form-inline align-items-start felement">
+                            <div class="w-100 m-0 p-0 border-0">
+                               ' . $chart . '
+                            </div>
+                        </div>
+                    </div>';
+            $mform->addElement('html', $html);
+            return true;
+        } catch (dml_exception | coding_exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Get the rendered chart html.
+     *
+     * @param stdClass $assign
+     * @param stdClass $grade
+     * @return string
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    private function get_rendered_chart(stdClass $assign, stdClass $grade): string {
+        global $DB, $OUTPUT;
+
+        $maxgrade = $assign->grade;
+
+        // Do not show chart when the grading type is not "Point".
+        if ($maxgrade == -1) {
+            return '';
+        }
+
+        $ranges = $this->generate_grade_ranges($maxgrade);
+
+        $dbparams = array('assignment' => $grade->assignment);
+        $assigngrades = $DB->get_records('assign_grades', $dbparams);
+        $lastattemptgrades = $this->filter_last_attempt_grades($assigngrades);
+
+        $numgradesinrange = $this->calculate_num_grades_in_range($ranges, $lastattemptgrades);
+
+        $chart = $this->generate_chart($ranges, $numgradesinrange);
+        return $OUTPUT->render($chart);
     }
 
     /**

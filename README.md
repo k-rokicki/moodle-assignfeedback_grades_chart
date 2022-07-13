@@ -25,6 +25,10 @@ into `mod/assign/feedback` directory.
   - Fix coding style problems
 - Version 2022071202
   - Fix coding style problems (again)
+- Version 2022071300
+  - Do not show charts in Grading table
+  - Do not show chart when the grading type is not "Point"
+  - Show chart when grading user submission
 
 ## About
 
