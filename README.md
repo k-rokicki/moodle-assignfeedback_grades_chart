@@ -29,6 +29,11 @@ into `mod/assign/feedback` directory.
   - Do not show charts in Grading table
   - Do not show chart when the grading type is not "Point"
   - Show chart when grading user submission
+- Version 2022071900
+  - Add github action support
+  - Fix constant naming
+  - Fix MOODLE_INTERNAL checks
+  - Use null_provider
 
 ## About
 
