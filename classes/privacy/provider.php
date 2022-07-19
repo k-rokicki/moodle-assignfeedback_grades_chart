@@ -24,8 +24,6 @@
 
 namespace assignfeedback_grades_chart\privacy;
 
-defined('MOODLE_INTERNAL') || die();
-
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
 
 use \core_privacy\local\metadata\collection;

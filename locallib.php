@@ -25,8 +25,6 @@
 use core\chart_bar;
 use core\chart_series;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Library class for grades_chart feedback plugin extending feedback plugin base class.
  *
