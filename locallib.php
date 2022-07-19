@@ -28,20 +28,6 @@ use core\chart_series;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Precision for grade's float calculations done by bcmath library.
- */
-const GRADE_PRECISION = 2;
-
-/**
- * Default number of ranges to show on the chart excluding last range [maxgrade, maxgrade].
- */
-const DEFAULT_NUM_RANGES = 10;
-
-/**
- * To avoid float rounding errors, all the math below is using bcmath library functions.
- */
-
-/**
  * Library class for grades_chart feedback plugin extending feedback plugin base class.
  *
  * @package   assignfeedback_grades_chart
@@ -49,6 +35,20 @@ const DEFAULT_NUM_RANGES = 10;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class assign_feedback_grades_chart extends assign_feedback_plugin {
+
+    /**
+     * Precision for grade's float calculations done by bcmath library.
+     */
+    const ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION = 2;
+
+    /**
+     * Default number of ranges to show on the chart excluding last range [maxgrade, maxgrade].
+     */
+    const ASSIGNFEEDBACK_GRADES_CHART_DEFAULT_NUM_RANGES = 10;
+
+    /**
+     * To avoid float rounding errors, all the math below is using bcmath library functions.
+     */
 
     /**
      * Get the name of the online grades_chart feedback plugin.
@@ -210,18 +210,18 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
      * @param int $ranges      number of ranges to return (excluding last range [$maxgrade, $maxgrade])
      * @return array           grade ranges
      */
-    private function generate_grade_ranges(string $maxgrade, int $ranges = DEFAULT_NUM_RANGES): array {
+    private function generate_grade_ranges(string $maxgrade, int $ranges = ASSIGNFEEDBACK_GRADES_CHART_DEFAULT_NUM_RANGES): array {
         $numranges = strval($ranges);
-        $step = bcdiv($maxgrade, $numranges, GRADE_PRECISION);
+        $step = bcdiv($maxgrade, $numranges, ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION);
         $ranges = array();
 
         $rangestart = '0';
 
         do {
-            $rangeend = bcadd($rangestart, $step, GRADE_PRECISION);
+            $rangeend = bcadd($rangestart, $step, ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION);
             $ranges[] = [$rangestart, $rangeend];
             $rangestart = $rangeend;
-            $comparison = bccomp($rangestart, $maxgrade, GRADE_PRECISION);
+            $comparison = bccomp($rangestart, $maxgrade, ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION);
         } while ($comparison < 0);
 
         $ranges[] = [$rangestart, $rangestart];
@@ -243,7 +243,7 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
             for ($i = count($ranges) - 1; $i >= 0; $i--) {
                 $range = $ranges[$i];
                 $rangestart = $range[0];
-                if (bccomp($grade, $rangestart, GRADE_PRECISION) >= 0) {
+                if (bccomp($grade, $rangestart, ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION) >= 0) {
                     $numgradesinrange[$i]++;
                     break;
                 }
