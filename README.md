@@ -32,8 +32,12 @@ into `mod/assign/feedback` directory.
 - Version 2022071900
   - Add github action support
   - Fix constant naming
-  - Fix MOODLE_INTERNAL checks
-  - Use null_provider
+  - Fix `MOODLE_INTERNAL` checks
+  - Use `null_provider`
+- Version 2022080600
+  - Shorten `yasis_label` string
+  - Add `self::` when referencing class constants
+  - Compatibility with Moodle 4.0
 
 ## About
 
