@@ -208,18 +208,18 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
      * @param int $ranges      number of ranges to return (excluding last range [$maxgrade, $maxgrade])
      * @return array           grade ranges
      */
-    private function generate_grade_ranges(string $maxgrade, int $ranges = ASSIGNFEEDBACK_GRADES_CHART_DEFAULT_NUM_RANGES): array {
+    private function generate_grade_ranges(string $maxgrade, int $ranges = self::ASSIGNFEEDBACK_GRADES_CHART_DEFAULT_NUM_RANGES): array {
         $numranges = strval($ranges);
-        $step = bcdiv($maxgrade, $numranges, ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION);
+        $step = bcdiv($maxgrade, $numranges, self::ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION);
         $ranges = array();
 
         $rangestart = '0';
 
         do {
-            $rangeend = bcadd($rangestart, $step, ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION);
+            $rangeend = bcadd($rangestart, $step, self::ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION);
             $ranges[] = [$rangestart, $rangeend];
             $rangestart = $rangeend;
-            $comparison = bccomp($rangestart, $maxgrade, ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION);
+            $comparison = bccomp($rangestart, $maxgrade, self::ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION);
         } while ($comparison < 0);
 
         $ranges[] = [$rangestart, $rangestart];
@@ -241,7 +241,7 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
             for ($i = count($ranges) - 1; $i >= 0; $i--) {
                 $range = $ranges[$i];
                 $rangestart = $range[0];
-                if (bccomp($grade, $rangestart, ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION) >= 0) {
+                if (bccomp($grade, $rangestart, self::ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION) >= 0) {
                     $numgradesinrange[$i]++;
                     break;
                 }
