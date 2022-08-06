@@ -29,5 +29,5 @@ $string['enabled_help'] = 'If enabled, students will see a chart showing how man
 $string['pluginname'] = 'Grades chart';
 $string['series_name'] = 'Number of students';
 $string['xasis_label'] = 'Grade range';
-$string['yasis_label'] = 'Number of students with result in a given range';
+$string['yasis_label'] = 'Number of students';
 $string['privacy:nullproviderreason'] = 'This plugin has no database to store user information. It only uses assign and assign_grades tables to fetch all grades for a given assignment.';
