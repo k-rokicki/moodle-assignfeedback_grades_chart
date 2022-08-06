@@ -208,7 +208,10 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
      * @param int $ranges      number of ranges to return (excluding last range [$maxgrade, $maxgrade])
      * @return array           grade ranges
      */
-    private function generate_grade_ranges(string $maxgrade, int $ranges = self::ASSIGNFEEDBACK_GRADES_CHART_DEFAULT_NUM_RANGES): array {
+    private function generate_grade_ranges(
+        string $maxgrade,
+        int $ranges = self::ASSIGNFEEDBACK_GRADES_CHART_DEFAULT_NUM_RANGES
+    ): array {
         $numranges = strval($ranges);
         $step = bcdiv($maxgrade, $numranges, self::ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION);
         $ranges = array();
