@@ -37,12 +37,12 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
     /**
      * Precision for grade's float calculations done by bcmath library.
      */
-    const ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION = 2;
+    const GRADE_PRECISION = 2;
 
     /**
      * Default number of ranges to show on the chart excluding last range [maxgrade, maxgrade].
      */
-    const ASSIGNFEEDBACK_GRADES_CHART_DEFAULT_NUM_RANGES = 10;
+    const DEFAULT_NUM_RANGES = 10;
 
     /**
      * To avoid float rounding errors, all the math below is using bcmath library functions.
@@ -210,19 +210,19 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
      */
     private function generate_grade_ranges(
         string $maxgrade,
-        int $ranges = self::ASSIGNFEEDBACK_GRADES_CHART_DEFAULT_NUM_RANGES
+        int $ranges = self::DEFAULT_NUM_RANGES
     ): array {
         $numranges = strval($ranges);
-        $step = bcdiv($maxgrade, $numranges, self::ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION);
+        $step = bcdiv($maxgrade, $numranges, self::GRADE_PRECISION);
         $ranges = array();
 
         $rangestart = '0';
 
         do {
-            $rangeend = bcadd($rangestart, $step, self::ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION);
+            $rangeend = bcadd($rangestart, $step, self::GRADE_PRECISION);
             $ranges[] = [$rangestart, $rangeend];
             $rangestart = $rangeend;
-            $comparison = bccomp($rangestart, $maxgrade, self::ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION);
+            $comparison = bccomp($rangestart, $maxgrade, self::GRADE_PRECISION);
         } while ($comparison < 0);
 
         $ranges[] = [$rangestart, $rangestart];
@@ -244,7 +244,7 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
             for ($i = count($ranges) - 1; $i >= 0; $i--) {
                 $range = $ranges[$i];
                 $rangestart = $range[0];
-                if (bccomp($grade, $rangestart, self::ASSIGNFEEDBACK_GRADES_CHART_GRADE_PRECISION) >= 0) {
+                if (bccomp($grade, $rangestart, self::GRADE_PRECISION) >= 0) {
                     $numgradesinrange[$i]++;
                     break;
                 }
