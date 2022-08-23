@@ -305,7 +305,9 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
         $yaxis->set_stepsize(1);
         $chart->set_yaxis($yaxis);
 
-        $chart->set_legend_options(['display' => false]);
+        if (method_exists($chart, 'set_legend_options')) {
+            $chart->set_legend_options(['display' => false]);
+        }
         $CFG->chart_colorset = ['#0f6cbf'];
 
         return $chart;
