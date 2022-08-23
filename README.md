@@ -38,6 +38,8 @@ into `mod/assign/feedback` directory.
   - Shorten `yasis_label` string
   - Add `self::` when referencing class constants
   - Compatibility with Moodle 4.0
+- Version 2022082400
+  - Compatibility with Moodle 3.5+
 
 ## About
 
