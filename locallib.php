@@ -190,7 +190,7 @@ class assign_feedback_grades_chart extends assign_feedback_plugin {
             $attempt = $singlegrade->attemptnumber;
             if (array_key_exists($userid, $latestgrades)) {
                 $entry = $latestgrades[$userid];
-                $latestattempt = $entry['attempt'];
+                $latestattempt = $entry->attempt;
                 if ($attempt > $latestattempt) {
                     $this->update_user_grade($latestgrades, $userid, $attempt, $grade);
                 }
