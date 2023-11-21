@@ -6,7 +6,7 @@ handled a given task by presenting their grades on a chart.
 
 ![Grades chart preview](./preview.png)
 
-Supported Moodle versions: 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 4.0
+Supported Moodle versions: 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 4.0, 4.1
 
 ## Quick install
 
@@ -40,6 +40,13 @@ into `mod/assign/feedback` directory.
   - Compatibility with Moodle 4.0
 - Version 2022082400
   - Compatibility with Moodle 3.5+
+- Version 2023112200
+  - Compatibility with Moodle 4.1
+
+## Contributors
+
+- kgmicro - https://github.com/kgmicro
+
 
 ## About
 

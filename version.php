@@ -24,6 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2022082400;
+$plugin->version   = 2023112200;
 $plugin->requires  = 2018051700;
 $plugin->component = 'assignfeedback_grades_chart';
